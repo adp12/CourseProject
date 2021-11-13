@@ -1,0 +1,17 @@
+APIs (To Documentation)
+huggingface[https://huggingface.co/transformers/task_summary.html]
+polygon.io[https://polygon.io/docs/getting-started]
+NewsAPI[https://newsapi.org/docs]
+CurrentsAPI[https://currentsapi.services/en/docs]
+YahooFinanceAPI[https://www.yahoofinanceapi.com]
+
+BM25 with sklearn
+https://gist.github.com/koreyou/f3a8a0470d32aa56b32f198f49a9f2b8
+
+stopwords
+https://raw.githubusercontent.com/meta-toolkit/meta/master/data/lemur-stopwords.txt
+
+ticker regex
+https://stackoverflow.com/questions/63874276/regex-pattern-to-match-ticker-symbol
+https://stackoverflow.com/questions/18647885/regular-expression-to-detect-company-tickers-using-java/18648174
+
