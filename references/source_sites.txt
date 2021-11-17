@@ -1,0 +1,31 @@
+News APIs (To Documentation)
+polygon.io[https://polygon.io/docs/getting-started]
+NewsAPI[https://newsapi.org/docs]
+CurrentsAPI[https://currentsapi.services/en/docs]
+YahooFinanceAPI[https://www.yahoofinanceapi.com]
+
+Transformer Model used for sentiment classification: DistilBERT
+-https://huggingface.co/transformers/task_summary.html
+--see also: DistilBERT Paper & Transformers Paper
+
+BM25 with sklearn
+-https://gist.github.com/koreyou/f3a8a0470d32aa56b32f198f49a9f2b8
+-https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
+
+Granger_causality
+-https://gist.github.com/susanli2016/2cfd2ffeff7fdc081ada2106bf66f4a9#file-granger_causality-py
+-https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.grangercausalitytests.html?highlight=grangercausality#statsmodels.tsa.stattools.grangercausalitytests
+
+Augmented Dickey-Fuller test for stationarity
+-https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html?highlight=adfuller#statsmodels.tsa.stattools.adfuller
+
+Kwiatkowski-Phillips-Schmidt-Shin test for stationarity
+-https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.kpss.html?highlight=kpss#statsmodels.tsa.stattools.kpss
+
+stopwords
+-https://raw.githubusercontent.com/meta-toolkit/meta/master/data/lemur-stopwords.txt
+
+ticker regex
+-https://stackoverflow.com/questions/63874276/regex-pattern-to-match-ticker-symbol
+-https://stackoverflow.com/questions/18647885/regular-expression-to-detect-company-tickers-using-java/18648174
+
