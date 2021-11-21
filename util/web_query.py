@@ -1,3 +1,4 @@
+from time import time
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -5,6 +6,8 @@ from datetime import datetime
 from dateutil import parser as dparser
 import urllib.parse
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
+import timeit
 
 import ipywidgets as widgets
 
@@ -48,6 +51,8 @@ class web_query(object):
         self.documents=[]
         self.number_of_documents=None
         self.failed=[]
+
+        self.timer=[]
     
     def get_results(self):
         return self.results
@@ -55,34 +60,73 @@ class web_query(object):
     def get_urllist(self):
         return self.results['url'].tolist()
     
-    def scrap_results(self, max_docs=50):
+    #added multi-threading to improve scrape speed 
+    def thread_scrape(self, pgres, soup_parser, url):
+        len_min=200
+        headers = {"User-Agent":"Mozilla/5.0"}
+        start = timeit.default_timer()
+        try:
+            response = requests.get(url=url, headers=headers, timeout=5)
+            #if response ok and no errors
+            if response.status_code==200:
+                soup = BeautifulSoup(response.content, soup_parser)
+                d = soup.get_text()
+                if len(d)>len_min:
+                    self.documents.append(d)
+            #else track failures
+            else:
+                self.failed.append(url)
+        except:
+            self.failed.append(url)
+        finally:
+            stop = timeit.default_timer()
+            pgres.value+=1
+        self.timer.append((stop-start))
+
+    def scrape_results(self, threaded=False, max_docs=50, workforce=20, soup_parser='html.parser'):
         
         url_list = self.results['url'].tolist()
         url_list = url_list[0:max_docs]
         len_min=200
-
+        times = []
         pgres = widgets.IntProgress(value=0,min=0,max=len(url_list), step=1)
         display(pgres)
-                
+        
         failed=[]
+        
+        s = requests.Session()
         headers = {"User-Agent":"Mozilla/5.0"}
-        for i in range(0,len(url_list)):
-            try:
-                response = requests.get(url=url_list[i],headers=headers)
-                if response.status_code==200:
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    d = soup.get_text()
-                    if len(d)>len_min:
-                        self.documents.append(d)
-                else:
-                    self.failed.append(i)
-            except:
-                self.failed.append(i)
+        s.headers.update(headers)
 
-            finally:
-                pgres.value+=1
-                pgres.description=str(i+1)+":"+str(len(url_list))
+        #Need multi-threadding to improve speed
+        if threaded:
+            with ThreadPoolExecutor(max_workers=workforce) as executor:
+                [executor.submit(self.thread_scrape, pgres=pgres, soup_parser=soup_parser, url=x) for x in url_list]
+        else:
+            for i in range(0,len(url_list)):
+
+                start = timeit.default_timer()
+                try:
+                    response = s.get(url=url_list[i])
+                    #if response ok and no errors
+                    if response.status_code==200:
+                        soup = BeautifulSoup(response.content, soup_parser)
+                        d = soup.get_text()
+                        if len(d)>len_min:
+                            self.documents.append(d)
+                    #else track failures
+                    else:
+                        self.failed.append(i)
+                except:
+                    self.failed.append(i)
+                finally:
+                    pgres.value+=1
+                    pgres.description=str(i+1)+":"+str(len(url_list))
                 
+                stop = timeit.default_timer()
+                times.append((stop-start))
+
+            self.timer = times        
         self.number_of_documents=len(self.documents)
         #remove failed url responses from dataset
         self.results = self.results.take(list(set(range(self.results.shape[0]))-set(self.failed)))
