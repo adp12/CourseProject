@@ -11,9 +11,9 @@ from scipy import sparse
 
 
 class BM25(object):
-    def __init__(self, norm=None, smooth_idf=True, stopwords=None, b=0.75, k1=1.6, idf_constant=False):
+    def __init__(self, norm=None, smooth_idf=True, stopwords=None, b=0.75, k1=1.6, idf_constant=False,  sublinear_tf=False, vocabulary=None):
 
-        self.vectorizer = TfidfVectorizer(norm=norm, smooth_idf=smooth_idf, stop_words=stopwords)
+        self.vectorizer = TfidfVectorizer(norm=norm, smooth_idf=smooth_idf, stop_words=stopwords, sublinear_tf=sublinear_tf, vocabulary=vocabulary)
         self.b = b
         self.k1 = k1
         self.idf_constant=idf_constant
