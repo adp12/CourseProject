@@ -65,9 +65,11 @@ class Corpus(object):
                 
         #for web results
         self.query_results=None
+        self.max_tokens=512
         self.failed = []
         
         #sub dividing documents
+        self.tokenizer=None
         self.sub_docs=None
         
         #relevance scores
@@ -153,7 +155,7 @@ class Corpus(object):
              
     
     #******************************************************************************
-    #------------------------------Sub Dividing------------------------------------
+    #------------------------------Sub Dividing-------------------------------------
     #******************************************************************************
     
     def get_pgraphs(self, doc, cutoff, method):
@@ -177,8 +179,34 @@ class Corpus(object):
                     
         return pgraphs
     
+    def split_doc(self, doc, subs):         
+            
+        if len(re.findall(r'\.', doc))>1:
+            cut_point = doc.rfind('.', 0, int(len(doc)/2))+1
+        else:
+            cut_point = int(len(doc)/2)
 
-    def get_subdocs(self, pgraphs, tokenizer, max_tokens=512):
+        d1 = doc[0:cut_point]
+        d2 = doc[cut_point+1:]
+
+        tkns1 = int(len(self.tokenizer(d1)['input_ids']))
+
+        if tkns1>self.max_tokens:
+            self.split_doc(d1,subs)
+        else:
+            if len(d1)>0:
+                subs.append(d1)
+
+        tkns2 = int(len(self.tokenizer(d2)['input_ids']))
+
+        if tkns2>self.max_tokens:
+            self.split_doc(d2, subs)
+        else:
+            if len(d2)>0:
+                subs.append(d2)
+            
+    
+    def get_subdocs(self, pgraphs):
         #Updated get_subdocs with iterative slicing 
         #ensure sub_docs tokens will not exceed max_tokens for sentiment model
         sub_docs=[]
@@ -187,31 +215,10 @@ class Corpus(object):
             sen_cnt = len(re.split('\n|\. ',pgraphs[x]))
             tkns = int(len(tokenizer(pgraphs[x])['input_ids']))
 
-            if tkns>=max_tokens:
-
-                pg = pgraphs[x]
-                slices=0
-
-                while True:
-                    #cut in half, count tokens
-                    slices+=1
-                    cut_point = pg.rfind(".",0,int(len(pg)/2))+1
-                    cut_tkns = int(len(tokenizer(pg[0:cut_point])['input_ids']))    
-
-                    if cut_tkns<max_tokens:
-                        break
-                    else:
-                        #trim pg and recut, counting slices
-                        pg = pg[0:cut_point]
-
-                #loop through pgraph[x] using multiples of cutpoint to slice
-                #append subdoc at each slice
-                for i in range(0, (slices*2)):
-                    pg = pgraphs[x][(cut_point*(i)):(cut_point*(i+1))]
-                    sub_docs.append(pg)
-
-            else:
+            if tkns<self.max_tokens:
                 sub_docs.append(pgraphs[x])
+            else:
+                self.split_doc(pgraphs[x],sub_docs)
         
         return sub_docs
         
@@ -222,18 +229,19 @@ class Corpus(object):
         #output form: dict{ document_id : [subdoc_1, subdoc_2 ... subdoc_n] }
 
         subbed_data = {}
+        self.tokenizer=tokenizer
 
         for x in range(0, len(self.documents)):
 
             pg = self.get_pgraphs(self.documents[x], cutoff, method)
-            subs = self.get_subdocs(pg, tokenizer)
+            subs = self.get_subdocs(pg)
             subbed_data[x]=subs
 
         self.sub_docs = subbed_data
 
         
     #******************************************************************************
-    #---------------------------Relevance Scoring----------------------------------
+    #----------------------------------Relevance Scoring---------------------------
     #******************************************************************************  
     
     def rank_docs(self, query, ranker):
