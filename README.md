@@ -30,3 +30,8 @@ Members
 	• How to present and provide user interface
 		○ Currently thinking plotly dash library
     		○ Will require a little extra work as there is an interface to learn
+	• Clean up repo for submission
+		○ Creating documentation
+		○ Creating use guide
+		○ Abstracting config file
+
