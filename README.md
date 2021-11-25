@@ -29,4 +29,4 @@ Members
 		○ Currently thinking locally organized text files for ease/speed of implementation
 	• How to present and provide user interface
 		○ Currently thinking plotly dash library
-    ○ Will require a little extra work as there is an interface to learn
+    		○ Will require a little extra work as there is an interface to learn
