@@ -5,8 +5,7 @@ import re
 class Ticker(object):
     
     def __init__(self,config, t, source='best'):
-        
-        #Get general information about company from ticker symbol via api
+        #Get general information about company from stock ticker symbol via api
         #name, ticker, industry, sector, tags
         
         t = t.upper()
@@ -46,6 +45,7 @@ class Ticker(object):
                     tags.append(i.strip())
                 self.tags=tags
         elif source=='poly':
+            #Try to get ticker information from Polygon.io when specified
             url = ('https://api.polygon.io/v1/meta/symbols/'+t+'/company?apikey='+config.polygon)
             response = requests.get(url)
             
@@ -60,6 +60,7 @@ class Ticker(object):
                 print('Bad response from Polygon.io')
 
         elif source=='yahoo':
+            #Try to get ticker information from yahoofinance when specified
             yheaders = {'x-api-key':config.yahoo}
             url = ('https://yfapi.net/v11/finance/quoteSummary/'+t+'?lang=en&region=US&modules=assetProfile')
             url2 = ('https://yfapi.net/v6/finance/quote?symbols='+t)
@@ -78,7 +79,7 @@ class Ticker(object):
                     tags.append(i.strip())
                 self.tags=tags
             else:
-                print("Bad response from yahoo finance, effecting sector/industry assignments and subsequent tagging")
+                print("Bad response from yahoo finance, affecting sector/industry assignments and subsequent tagging")
 
             response2 = requests.request("GET",url2,headers=yheaders)
 
@@ -87,4 +88,4 @@ class Ticker(object):
                 self.name = response2['quoteResponse'].get('result')[0].get('longName')
                 self.ticker = response2['quoteResponse'].get('result')[0].get('symbol')
             else:
-                print("Bad response from yahoo finance, effecting name/ticker assignment")
+                print("Bad response from yahoo finance, affecting name/ticker assignment")
