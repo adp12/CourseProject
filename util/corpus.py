@@ -55,13 +55,6 @@ class Corpus(object):
         self.vocabulary = []
         self.number_of_documents = 0
         self.vocabulary_size = 0
-        
-        #plsa and liklihoods
-        self.likelihoods = []
-        self.term_doc_matrix = None 
-        self.document_topic_prob = None  # P(z | d)
-        self.topic_word_prob = None  # P(w | z)
-        self.topic_prob = None  # P(z | d, w)
                 
         #for web results
         self.query_results=None
@@ -71,17 +64,29 @@ class Corpus(object):
         #sub dividing documents
         self.tokenizer=None
         self.sub_docs=None
+        self.sub_list=[]
+        
+        #queries
+        self.prime_q=None
+        self.expanded_q=None        
         
         #relevance scores
         self.document_scores=None
-        self.document_tag_scores=None
         self.subdoc_scores=None
-        self.subdoc_tag_scores=None
         self.title_scores=None
+        self.sub_list_scores=None
                 
         #pruned data
-        self.relevant_set=None
-        self.relevant_scores=None
+        self.pruned_docs=[]
+        self.pruned_subdocs={}
+        
+        #relevant
+        self.relevant_set={}
+        self.relevant_scores={}
+        self.rel_list_scores=[]
+        
+        #sentiments
+        self.sentiments=None
     
     
     #******************************************************************************
@@ -94,41 +99,7 @@ class Corpus(object):
     
     def set_corpus(self, documents):
         self.documents = documents
-        
-    def build_corpus_from_url(self, max_docs=50):
-        
-        #scrape text from url-list to build corpus
-        #(not recommended, use the same method from the web_query object and the set_corpus() method)
-        
-        url_list = self.query_results['url'].tolist()
-        url_list = url_list[0:max_docs]
-        
-        pgres = widgets.IntProgress(value=0,min=0,max=len(url_list), step=1)
-        display(pgres)
-        
-        failed=[]
-        headers = {"User-Agent":"Mozilla/5.0"}
-        for i in range(0,len(url_list)):
-            try:
-                response = requests.get(url=url_list[i],headers=headers)
-                if response.status_code==200:
-                    soup = BeautifulSoup(response.content, 'html.parser')
-                    d = soup.get_text()
-                    if len(d)>200:
-                        self.documents.append(d)
-                else:
-                    self.failed.append(i)
-            except:
-                self.failed.append(i)
-
-            finally:
-                pgres.value+=1
-                pgres.description=str(i+1)+":"+str(len(url_list))
                 
-        self.number_of_documents=len(self.documents)
-        #remove failed url responses from dataset
-        self.query_results = self.query_results.take(list(set(range(self.query_results.shape[0]))-set(self.failed)))
-        
 
     def build_corpus_from_file(self, file_path):
 
@@ -151,8 +122,25 @@ class Corpus(object):
         v = list(v)
         self.vocabulary = v
         self.vocabulary_size = len(v)
+    
+    def build_queries(self, ticker, prime_w=1, tag_w=0.05, include_gtags=True, gtags_w=0.01, include_btags=True, btags_w=0.01):
+        name = re.sub('(,|\.|Inc|inc|company|co )',"",str(ticker.name))
+        self.prime_q = name
         
-             
+        gtags = ['investing','analysis','analyst','upgrade','downgrade']
+        btags = ['sentiment','opinion','outlook']
+        
+        exp = []
+        for t in ticker.tags:
+            exp.append([t, tag_w])
+        if include_gtags:
+            for t in gtags:
+                exp.append([t, gtags_w])
+        if include_btags:
+            for t in btags:
+                exp.append([t, btags_w])
+        
+        self.expanded_q=exp
     
     #******************************************************************************
     #------------------------------Sub Dividing-------------------------------------
@@ -179,48 +167,55 @@ class Corpus(object):
                     
         return pgraphs
     
-    def split_doc(self, doc, subs):         
+    def split_doc(self, doc):         
+        
+        if len(doc)>0:
+            avgwrds = 15
+            estsens = len(doc)/avgwrds
+        
+            if len(re.findall('\.',doc))>=estsens:
+                cut_point = doc.rfind('.', 0, int(len(doc)/2))
+                if cut_point<=0:
+                    cut_point = int(len(doc)/2)
+            else:
+                cut_point = int(len(doc)/2)
+
+            d1 = doc[0:cut_point]
+            d2 = doc[cut_point+1:]
             
-        if len(re.findall(r'\.', doc))>1:
-            cut_point = doc.rfind('.', 0, int(len(doc)/2))+1
-        else:
-            cut_point = int(len(doc)/2)
+            tkns1 = int(len(self.tokenizer(d1)['input_ids']))
 
-        d1 = doc[0:cut_point]
-        d2 = doc[cut_point+1:]
+            if tkns1>self.max_tokens:
+                self.split_doc(d1)
+            else:
+                if len(d1)>0:
+                    self.subs.append(d1)
 
-        tkns1 = int(len(self.tokenizer(d1)['input_ids']))
+            tkns2 = int(len(self.tokenizer(d2)['input_ids']))
 
-        if tkns1>self.max_tokens:
-            self.split_doc(d1,subs)
-        else:
-            if len(d1)>0:
-                subs.append(d1)
+            if tkns2>self.max_tokens:
+                self.split_doc(d2)
+            else:
+                if len(d2)>0:
+                    self.subs.append(d2)
 
-        tkns2 = int(len(self.tokenizer(d2)['input_ids']))
-
-        if tkns2>self.max_tokens:
-            self.split_doc(d2, subs)
-        else:
-            if len(d2)>0:
-                subs.append(d2)
-            
     
     def get_subdocs(self, pgraphs):
         #Updated get_subdocs with iterative slicing 
+        #Changed to recursive slicing
         #ensure sub_docs tokens will not exceed max_tokens for sentiment model
-        sub_docs=[]
+        self.subs=[]
 
         for x in range(0, len(pgraphs)):
             sen_cnt = len(re.split('\n|\. ',pgraphs[x]))
             tkns = int(len(tokenizer(pgraphs[x])['input_ids']))
 
             if tkns<self.max_tokens:
-                sub_docs.append(pgraphs[x])
+                self.subs.append(pgraphs[x])
             else:
-                self.split_doc(pgraphs[x],sub_docs)
+                self.split_doc(pgraphs[x])
         
-        return sub_docs
+        return self.subs
         
     def sub_divide(self, tokenizer, cutoff=1, method='sen'):
 
@@ -230,156 +225,175 @@ class Corpus(object):
 
         subbed_data = {}
         self.tokenizer=tokenizer
-
+        
+        if len(self.pruned_docs)==0:
+            self.prune_docs()
+        
         for x in range(0, len(self.documents)):
-
-            pg = self.get_pgraphs(self.documents[x], cutoff, method)
-            subs = self.get_subdocs(pg)
-            subbed_data[x]=subs
-
+            
+            #only include documents that made the first relevance cut
+            if x in self.pruned_docs:
+                pg = self.get_pgraphs(self.documents[x], cutoff, method)
+                subs = self.get_subdocs(pg)
+                subbed_data[x]=subs
+        
         self.sub_docs = subbed_data
+        self.sub_list=[]
+        for x in self.sub_docs.keys():
+            for y in self.sub_docs[x]:
+                self.sub_list.append(y)
+        
 
         
     #******************************************************************************
     #----------------------------------Relevance Scoring---------------------------
     #******************************************************************************  
     
-    def rank_docs(self, query, ranker):
+    def rank_docs(self, ranker):
+        query = self.prime_q
         self.document_scores = ranker.score(query, self.documents)
         
-    def rank_doc_tags(self, tags, ranker):
-        tag_scores=[]
-        for t in tags:
-            scores = ranker.score(t, self.documents)
-            tag_scores.append(scores)
-            
-        self.document_tag_scores = tag_scores
         
-    def rank_subdocs(self, query, ranker):
+    def rank_subdocs(self, ranker, expanded=False):
         sub_vecs={}
-        for x in self.sub_docs.keys():
-            sub_vec = ranker.score(query, self.sub_docs[x])
-            sub_vecs[x]=sub_vec
+        
+        if expanded==False:
+            query=self.prime_q
+            for x in self.sub_docs.keys():
+                sub_vec = ranker.score(query, self.sub_docs[x])
+                sub_vecs[x]=sub_vec
+        else:
+            query = self.expanded_q
+            for x in self.sub_docs.keys():
+                sub_vec = ranker.score_expanded(query, self.sub_docs[x])
+                sub_vecs[x]=sub_vec
             
         self.subdoc_scores = sub_vecs
-    
-    def rank_subdocs_tags(self, tags, ranker):
         
-        tag_scores=[]
-        for t in tags:
-            sub_vecs={}
-            for x in self.sub_docs.keys():
-                sub_vec = ranker.score(t, self.sub_docs[x])
+        self.sub_list_scores=[]
+        for x in self.subdoc_scores.keys():
+            for y in self.subdoc_scores[x]:
+                self.sub_list_scores.append(y)
+    
+    def rank_relevant(self, ranker, expanded=True):
+        sub_vecs={}
+        
+        if expanded==False:
+            query=self.prime_q
+            for x in self.relevant_set.keys():
+                sub_vec = ranker.score(query, self.relevant_set[x])
                 sub_vecs[x]=sub_vec
-            tag_scores.append(sub_vecs)
+        else:
+            query=self.expanded_q
+            for x in self.relevant_set.keys():
+                sub_vec = ranker.score_expanded(query, self.relevant_set[x])
+                sub_vecs[x]=sub_vec
+            
+        self.relevant_scores = sub_vecs
         
-        self.subdoc_tag_scores = tag_scores
-    
-    def rank_titles(self, name, ranker):
-        name = re.sub('(,|\.|Inc| )',"",str(name))
-        titles = self.query_results['title'].tolist()
-        self.title_scores = ranker.score(name, titles)
-        
-    def rank_ticker(self, ticker, ranker):
-        
-        #Takes a ticker object and runs all of the rankers above
-        
-        name = ticker.name
-        sym = ticker.ticker
-        tags = ticker.tags
-        
-        self.rank_docs(name,ranker)
-        self.rank_doc_tags(tags, ranker)
-        self.rank_subdocs(name,ranker)
-        self.rank_subdocs_tags(tags,ranker)
-        self.rank_titles(name,ranker)
+        self.rel_list_scores=[]
+        for x in self.relevant_scores.keys():
+            for y in self.relevant_scores[x]:
+                self.rel_list_scores.append(y)
+       
         
     #******************************************************************************
     #----------------------------Pruning Relevant Set------------------------------
     #******************************************************************************
-    
-    def prune_subdocs(self, cutoff=0.4):
-        subbed_data = self.sub_docs
-        sub_scores = self.subdoc_scores
-        for x in self.sub_docs.keys():
+    def prune_docs(self, method='finite', cutoff=0):
+        
+        '''
+        method percentile: cutoff is the percentile to lower bound the document scores on
+        method finite: cutoff is a hard value to cutoff scores on
+        
+        store the indexes of the documents that have scores over the cutoff
+        these indexes will be used in the creation of the subdocs
+        '''
+        
+        if method=='percentile':
+            p = np.percentile(self.document_scores, cutoff)
+            cuts = np.where(self.document_scores<p)
+            
+            for x in range(0, len(self.documents)):
+                if x not in cuts:
+                    self.pruned_docs.append(x)
+                                                 
+        elif method=='finite':
+            for x in range(0, len(self.documents)):
+                if self.document_scores[x]>cutoff:
+                    self.pruned_docs.append(x)
+                    
+            
+    def prune_subdocs(self, method='finite', cutoff=0):
+        
+        '''
+        method percentile: cutoff is the percentile to lower bound the document scores on
+        method finite: cutoff is a hard value to cutoff scores on
+        
+        '''
+        
+        if method=='percentile':
+            p = np.percentile(self.sub_list_scores, cutoff)
+            prune={}
+            for x in self.sub_docs.keys():
+                for y in range(0, len(sub_docs[x])):
+                    if subdoc_scores[x][y]>p:
+                        if x not in prune.keys():
+                            prune[x]=[y]
+                        else:
+                            prune[x].append(y)
+            self.pruned_subdocs=prune
+            
+        elif method=='finite':
+            prune={}
+            for x in self.sub_docs.keys():
+                for y in range(0, len(self.sub_docs[x])):
+                    if self.subdoc_scores[x][y]>cutoff:
+                        if x not in prune.keys():
+                            prune[x]=[y]
+                        else:
+                            prune[x].append(y)
+            
+            self.pruned_subdocs=prune
+        
+    def make_relevant(self):
+        #Create the relevant_set from the sub_doc keys in the pruned_subdocs dict
+        
+        for x in self.pruned_subdocs.keys():
+            self.relevant_set[x]=[]
+            self.relevant_scores[x]=[]
+            for y in self.pruned_subdocs[x]:
+                self.relevant_set[x].append(self.sub_docs[x][y])
+                self.relevant_scores[x].append(self.subdoc_scores[x][y])
+        
+        self.rel_list=[]
+        for x in self.relevant_set.keys():
+            for y in self.relevant_set[x]:
+                self.rel_list.append(y)
+        
+    def prune_relevant(self, method='percentile',cutoff=15):
+        #Relevant is as low as it goes, these will be adjusted directly when pruned
+        
+        if method=='percentile':
+            cut = np.percentile(self.rel_list_scores, cutoff)
+        else:
+            cut = cutoff
+        
+        subbed_data = self.relevant_set
+        sub_scores = self.relevant_scores
+        
+        for x in self.relevant_set.keys():
 
-            subbed_data[x] = [xv if c else None for c, xv in zip(sub_scores[x]>cutoff, subbed_data[x])]
+            subbed_data[x] = [xv if c else None for c, xv in zip(sub_scores[x]>cut, subbed_data[x])]
             subbed_data[x] = [y for y in subbed_data[x] if y!=None]
-            sub_scores[x] = [y for y in sub_scores[x] if y>cutoff]
+            sub_scores[x] = [y for y in sub_scores[x] if y>cut]
         
         self.relevant_set = {k: v for k, v in subbed_data.items() if len(v) > 0}
         self.relevant_scores={k: v for k, v in sub_scores.items() if len(v) > 0}
-    
-    #******************************************************************************
-    #-------------------------------------PLSA (from MP3)--------------------------
-    #******************************************************************************
-    
-    def build_term_doc_matrix(self):
         
-        m = []
-        line = []
-        for x in self.documents:
-            doc = list(x.split())
-            for itm in self.vocabulary:
-                line.append(x.count(itm))
-            m.append(line)
-            line = []
-        self.term_doc_matrix = np.array(m)
+        self.rel_list=[]
+        for x in self.relevant_set.keys():
+            for y in self.relevant_set[x]:
+                self.rel_list.append(y)
         
-    def initialize_prob(self, number_of_topics):
-
-        self.document_topic_prob = np.random.random_sample((self.number_of_documents, number_of_topics))
-        self.document_topic_prob = normalize(self.document_topic_prob)
-
-        self.topic_word_prob = np.random.random_sample((number_of_topics, len(self.vocabulary)))
-        self.topic_word_prob = normalize(self.topic_word_prob)
-
-            
-    def E_step(self):
-        
-        for x in range(0,self.term_doc_matrix.shape[0]):  #loop through documents
-            e = self.document_topic_prob[x].reshape(-1,1)*self.topic_word_prob
-            self.topic_prob[x] = normalize(e)
-           
-
-    def M_step(self, number_of_topics):
-        
-        pz = []
-        for x in range(0, self.term_doc_matrix.shape[0]):         
-            m = self.topic_prob[x]*self.term_doc_matrix[x].reshape(1,-1)
-            self.document_topic_prob[x] = np.sum(m,axis=1)
-            pz.append(m)
-
-        #update
-        
-        pz = np.array(pz)
-        self.topic_word_prob = np.sum(pz,axis=0)
-        
-        self.document_topic_prob = normalize(self.document_topic_prob)
-        self.topic_word_prob = normalize(self.topic_word_prob)
  
-
-    def calculate_likelihood(self, number_of_topics):
-
-        l = np.log(np.prod(np.power(np.dot(self.document_topic_prob,self.topic_word_prob),self.term_doc_matrix),axis=1))
-        l = l[np.argmax(l)]
-        self.likelihoods.append(l)
-        
-
-    def plsa(self, number_of_topics, max_iter, epsilon):
-
-        self.build_term_doc_matrix()
-        self.topic_prob = np.zeros([self.number_of_documents, number_of_topics, self.vocabulary_size], dtype=np.float)
-        self.initialize_prob(number_of_topics)
-        current_likelihood = 0.0
-
-        for iteration in range(max_iter):
-            self.E_step()
-            self.M_step(number_of_topics)
-            
-            l = self.calculate_likelihood(number_of_topics)
-            
-            if current_likelihood==0 or current_likelihood==None or l>current_likelihood:
-                current_likelihood = l
-            else:
-                break
