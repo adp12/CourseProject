@@ -35,3 +35,24 @@ Members
 		○ Creating use guide
 		○ Abstracting config file
 
+
+11/30 To Ds
+
+
+	• Broadly:
+		○ How to use
+		○ Method of data storage
+		○ Method of data presentation
+	• More specific:
+		○ Metric calculation
+			§ Issues may be arising with the sentiment from the transformer
+			§ Hugging face provides a method to add to the training of a model to make it work more specifically to a task
+			§ If we can create a labeled data set with some examples, we may be able to improve it
+			§ Not as bad as it sounds
+		○ Dataset storage
+			§ Still thinking easiest method is local text files for convenience
+		○ Making it use-able
+			§ This is where a dash board would come in handy
+			§ If everything is tuned and working, you could set it to create a few sets for a list of ticker symbols
+			§ The dashboard would then be used to present the sets of data
+
