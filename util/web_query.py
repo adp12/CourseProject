@@ -1,18 +1,18 @@
-from time import time
-import requests
 from bs4 import BeautifulSoup
-import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from dateutil import parser as dparser
-import urllib.parse
-import pandas as pd
-from concurrent.futures import ThreadPoolExecutor
-import timeit
 
 import ipywidgets as widgets
+import pandas as pd
+import re
+import requests
+
+from time import time
+import timeit
+import urllib.parse
 
 class web_query(object):
-    
     '''
     **********************************************************************************
     *********Large wrapper class for querying apis to accumulate news data************
@@ -34,7 +34,7 @@ class web_query(object):
     *also removes any duplicate url or title instance
     **dateframe columns('title', 'url', 'pub_date')
     
-    scrap_results(max_docs)
+    scrape_results(max_docs)
     *scrapes the text from the urls accumulated in the query results up to the specified
     number of max_docs (default 50)
     *scraped text stored in self.documents
@@ -84,27 +84,25 @@ class web_query(object):
         self.timer.append((stop-start))
 
     def scrape_results(self, threaded=False, max_docs=50, workforce=20, soup_parser='html.parser'):
-        
         url_list = self.results['url'].tolist()
         url_list = url_list[0:max_docs]
         len_min=200
         times = []
+        failed = []
+
         pgres = widgets.IntProgress(value=0,min=0,max=len(url_list), step=1)
         display(pgres)
-        
-        failed=[]
         
         s = requests.Session()
         headers = {"User-Agent":"Mozilla/5.0"}
         s.headers.update(headers)
 
-        #Need multi-threadding to improve speed
+        #Need multi-threading to improve speed
         if threaded:
             with ThreadPoolExecutor(max_workers=workforce) as executor:
                 [executor.submit(self.thread_scrape, pgres=pgres, soup_parser=soup_parser, url=x) for x in url_list]
         else:
             for i in range(0,len(url_list)):
-
                 start = timeit.default_timer()
                 try:
                     response = s.get(url=url_list[i])
@@ -139,7 +137,6 @@ class web_query(object):
         self.results=results
     
     def query_all(self, query, ticker, d_start='Now', d_end='Now'):
-        
         #Running query through Usearch API
         self.query_Usearch(query=query, d_start=d_start)
         
@@ -154,7 +151,6 @@ class web_query(object):
         
         
     def query_Usearch(self, query, d_start='Now', d_end='Now', page=1, pageSize=50):
-    
         query = urllib.parse.quote_plus(query)
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
@@ -163,6 +159,7 @@ class web_query(object):
             d_end = dparser.parse(d_end)
         d_end_str = d_end.strftime("%Y-%m-%d")
 
+        # Same thing but for start date
         if d_start=='Now':
             d_start=datetime.now()
         else:
@@ -197,7 +194,6 @@ class web_query(object):
             self.frames.append(df)
     
     def query_currents(self, query, d_start='Now', d_end='Now', page=1, pageSize=200):
-    
         #6-Month archive
 
         query = urllib.parse.quote_plus(query)
@@ -240,7 +236,6 @@ class web_query(object):
             self.frames.append(df)
     
     def query_polygon(self, ticker, d_start='Now', d_end='Now', pageSize=200):
-    
         ticker = ticker.upper()
 
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
@@ -250,6 +245,7 @@ class web_query(object):
             d_end = dparser.parse(d_end)
         d_end_str = d_end.strftime("%Y-%m-%d")
 
+        # Same thing but for start date
         if d_start=='Now':
             d_start=datetime.now()
         else:
@@ -279,7 +275,6 @@ class web_query(object):
             self.frames.append(df)
     
     def query_newsapi(self, query, d_start='Now', d_end='Now', domains="", exclude="", page=1, pageSize=100):
-    
         #1 Month archive
 
         query = urllib.parse.quote_plus(query)
@@ -291,6 +286,7 @@ class web_query(object):
             d_end = dparser.parse(d_end)
         d_end_str = d_end.strftime("%Y-%m-%d")
 
+        # Same thing but for start date
         if d_start=='Now':
             d_start=datetime.now()
         else:

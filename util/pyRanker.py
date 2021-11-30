@@ -2,7 +2,7 @@
 Implementation of OKapi BM25 with sklearn's TfidfVectorizer
 Distributed as CC-0 (https://creativecommons.org/publicdomain/zero/1.0/)
 
-Tony: Adjusted for added flexibility
+Has been modified for additional flexibility
 """
 
 import numpy as np
@@ -13,7 +13,6 @@ from scipy import sparse
 
 class BM25(object):
     def __init__(self, norm=None, smooth_idf=True, stopwords=None, b=0.75, k1=1.6, W=[], idf_constant=False, sublinear_tf=False, vocabulary=None):
-
         self.vectorizer = TfidfVectorizer(norm=norm, smooth_idf=smooth_idf, stop_words=stopwords, sublinear_tf=sublinear_tf, vocabulary=vocabulary)
         self.count_vec = CountVectorizer(stop_words=stopwords, vocabulary=vocabulary)
         self.b = b
@@ -43,8 +42,8 @@ class BM25(object):
         # convert to csc for better column slicing
         X = X.tocsc()[:, q.indices]
         
-        # idf(t) = log [ n / df(t) ] + 1 in sklearn, so it need to be coneverted
-        # to idf(t) = log [ n / df(t) ] with minus 1
+        # idf(t) = log [ n / df(t) ] + 1 in sklearn, so it need to be converted to
+        # idf(t) = log [ n / df(t) ] - 1
         if self.idf_constant==True:
             idf = self.vectorizer._tfidf.idf_[None, q.indices]
         else:
@@ -55,7 +54,6 @@ class BM25(object):
         return (numer / denom).sum(1).A1
 
     def score_expanded(self, Q, X, weighted_tf=False):
-        
         '''
         paper source info:
         2008 Robust and WSD tasks - Perez-Aguera, Zaragoza
@@ -98,6 +96,7 @@ class BM25(object):
             
             self.Eidf.append(eidf)
 
+        # Calculates BM25 score for all query weight pairs
         scr=[]
         for x in range(0, len(Q)):
             denom = self.tfc[x] + (k1 * (1 - b + b * (dl/avdl)))[:,None]
