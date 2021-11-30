@@ -61,6 +61,8 @@ class web_query(object):
         return self.results['url'].tolist()
     
     #added multi-threading to improve scrape speed 
+    #Estimated performance increase over iterative: 85%
+
     def thread_scrape(self, pgres, soup_parser, url):
         len_min=200
         headers = {"User-Agent":"Mozilla/5.0"}
@@ -83,7 +85,7 @@ class web_query(object):
             pgres.value+=1
         self.timer.append((stop-start))
 
-    def scrape_results(self, threaded=False, max_docs=50, workforce=20, soup_parser='html.parser'):
+    def scrape_results(self, threaded=True, max_docs=50, workforce=20, soup_parser='html.parser'):
         
         url_list = self.results['url'].tolist()
         url_list = url_list[0:max_docs]
@@ -138,21 +140,42 @@ class web_query(object):
         results = results.drop_duplicates(subset=['title'])
         self.results=results
     
-    def query_all(self, query, ticker, d_start='Now', d_end='Now'):
+    def query_all(self, query, ticker, d_start='Now', d_end='Now', threaded=True):
         
-        #Running query through Usearch API
-        self.query_Usearch(query=query, d_start=d_start)
+        if threaded:
+            apis = ['usearch', 'poly', 'currents', 'newsapi']
+            with ThreadPoolExecutor(max_workers=len(apis)) as executor:
+                    [executor.submit(self.query_api, query=query, ticker=ticker, d_start=d_start, d_end=d_end, api=x) for x in apis]
+        else:
+            # #Running query through Usearch API
+            self.query_Usearch(query=query, d_start=d_start)
+            
+            # #Running query through Currents API
+            self.query_currents(query=query, d_start=d_start)
+            
+            # #Running query through Polygon.io
+            self.query_polygon(ticker=ticker, d_start=d_start)
+            
+            # #Running query through (google)NewsAPI
+            self.query_newsapi(query=query, d_start=d_start)
+            
         
-        #Running query through Currents API
-        self.query_currents(query=query, d_start=d_start)
-        
-        #Running query through Polygon.io
-        self.query_polygon(ticker=ticker, d_start=d_start)
-        
-        #Running query through (google)NewsAPI
-        self.query_newsapi(query=query, d_start=d_start)
-        
-        
+    def query_api(self, query, api, ticker, d_start='Now', d_end='Now', page=1):
+        #Used for multi-processing the api requests to improve time
+        #Estimated performance increase over iterative: 40%
+
+        if api=='usearch':
+            self.query_Usearch(query=query, d_start=d_start, d_end=d_end)
+
+        elif api=='poly':
+            self.query_polygon(ticker=ticker, d_start=d_start, d_end=d_end)
+
+        elif api=='currents':
+            self.query_currents(query=query, d_start=d_start, d_end=d_end)
+
+        elif api=='newsapi':
+            self.query_newsapi(query=query, d_start=d_start, d_end=d_end)
+
     def query_Usearch(self, query, d_start='Now', d_end='Now', page=1, pageSize=50):
     
         query = urllib.parse.quote_plus(query)
