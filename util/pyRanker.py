@@ -82,7 +82,7 @@ class BM25(object):
         # apply CountVectorizer
         X = self.count_vec.transform(X)
         dl = X.sum(1).A1
-
+        epsilon = 0.0001
         #Q should be a list of query weight pairs
         #Loop through the queries in Q
         #each q in Q should be a [query, weight]
@@ -92,9 +92,12 @@ class BM25(object):
             qe, = self.count_vec.transform([q[0]])
             tf = X.tocsc()[:,qe.indices]
             wtf = X.tocsc()[:,qe.indices] * q[1]
-            self.tfc.append(tf)
+            if weighted_tf:
+                self.tfc.append(wtf)
+            else:
+                self.tfc.append(tf)
             idf = self.vectorizer._tfidf.idf_[None, qe.indices] - 1.
-            eidf = ((1/wtf.sum()) * wtf.multiply(np.broadcast_to(idf, wtf.shape))).sum()
+            eidf = ( float( 1/ (wtf.sum()+epsilon) ) * wtf.multiply(np.broadcast_to(idf, wtf.shape))).sum()
             
             self.Eidf.append(eidf)
 
