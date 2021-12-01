@@ -89,3 +89,18 @@ class Ticker(object):
                 self.ticker = response2['quoteResponse'].get('result')[0].get('symbol')
             else:
                 print("Bad response from yahoo finance, affecting name/ticker assignment")
+    
+    def get_price(self, config, drange='1mo', interval='1d'):
+        
+        yheaders = {'x-api-key':config.yahoo}
+        url = ('https://yfapi.net/v8/finance/spark?'
+                'interval='+interval+
+                '&range='+drange+
+                '&symbols='+self.ticker)
+        response = requests.request("GET",url,headers=yheaders)
+        if response.status_code==200:
+                response = response.json()
+            
+        return response
+            
+
