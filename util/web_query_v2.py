@@ -46,7 +46,7 @@ class web_query(object):
     '''
 
 
-    def __init__(self, config):
+    def __init__(self, config, pagesizes=None):
         self.config = config
         self.frames = []
         self.results=None
@@ -56,7 +56,12 @@ class web_query(object):
         self.failed=[]
 
         self.timer=[]
-    
+
+        if pagesizes is None:
+            self.pagesizes = {'usearch':50 , 'poly':200, 'currents':200 ,'newsapi':100}
+        else:
+            self.pagesizes=pagesizes
+
     def get_results(self):
         return self.results
     
@@ -208,8 +213,10 @@ class web_query(object):
             self.query_newsapi(query=query[0], d_start=d_start, d_end=d_end, page=page)
 
 
-    def query_Usearch(self, query, d_start='Now', d_end='Now', page=1, pageSize=50):
+    def query_Usearch(self, query, d_start='Now', d_end='Now', page=1):
         query = urllib.parse.quote_plus(query)
+        pageSize = self.pagesizes['usearch']
+        
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
             d_end=datetime.now()
@@ -257,10 +264,11 @@ class web_query(object):
         #sleep for 2 milliseconds
         time.sleep(0.002)
     
-    def query_currents(self, query, d_start='Now', d_end='Now', page=1, pageSize=200):
+    def query_currents(self, query, d_start='Now', d_end='Now', page=1):
         #6-Month archive
         datecut = datetime.now()-relativedelta(months=6)
         query = urllib.parse.quote_plus(query)
+        pageSize = self.pagesizes['currents']
 
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
@@ -312,9 +320,9 @@ class web_query(object):
         #sleep for 2 milliseconds
         time.sleep(0.002)
 
-    def query_polygon(self, ticker, d_start='Now', d_end='Now', pageSize=500):
+    def query_polygon(self, ticker, d_start='Now', d_end='Now'):
         ticker = ticker.upper()
-
+        pageSize = self.pagesizes['poly']
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
             d_end=datetime.now()
@@ -353,10 +361,11 @@ class web_query(object):
         else:
             print("error on polygon api")
 
-    def query_newsapi(self, query, d_start='Now', d_end='Now', domains="", exclude="", page=1, pageSize=100):
+    def query_newsapi(self, query, d_start='Now', d_end='Now', domains="", exclude="", page=1):
         #1 Month archive only (lame af)
         datecut = datetime.now()-relativedelta(months=1)
         query = urllib.parse.quote_plus(query)
+        pageSize = self.pagesizes['newsapi']
 
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
