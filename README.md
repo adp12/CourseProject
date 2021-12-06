@@ -30,6 +30,12 @@ Members
 			§ This is where a dash board would come in handy
 			§ If everything is tuned and working, you could set it to create a few sets for a list of ticker symbols
 			§ The dashboard would then be used to present the sets of data
+		
+		○ Cleaning up config
+			§ Provide sites to obtain APIs that have support
+			§ remove the keys
+			§ adjust the commit history to remove the keys
+			§ Dont push any more keys!
 
 Starting Documentation:
 
