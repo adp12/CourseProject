@@ -78,9 +78,9 @@ class data_manager(object):
                     
                     df = df.drop_duplicates(subset=['pub_date','url'],keep='last')
                     
-                    df.to_csv(f, index=True, index_label='index')
+                    df.to_csv(f, index=False)
                 else:
-                    full_df.to_csv(f, index=True, index_label='index')
+                    full_df.to_csv(f, index=False)
             
             if price_df is not None:
                 f = os.path.join(tdir, "price_df.csv")
@@ -91,16 +91,48 @@ class data_manager(object):
                     df = stored_df.append(price_df)
                     df = df.drop_duplicates(subset=['pub_date'],keep='last')
                     
-                    df.to_csv(f, index=True, index_label='index')
+                    df.to_csv(f, index=False)
                 else:
-                    price_df.to_csv(f, index=True, index_label='index')
+                    price_df.to_csv(f, index=False)
 
         #if not store them
         else:
             if full_df is not None:
                 f = os.path.join(tdir, "full_df.csv")
-                full_df.to_csv(f, index=True, index_label='index')
+                full_df.to_csv(f, index=False)
             
             if price_df is not None:
                 f = os.path.join(tdir, "price_df.csv")
-                price_df.to_csv(f, index=True, index_label='index')
+                price_df.to_csv(f, index=False)
+    
+    def get_pricedf(self, ticker):
+        self.get_ticker_list()
+        
+        #check if there is a folder for this ticker
+        if ticker in self.ticker_list:
+            tdir = os.path.join(self.datadir,ticker)
+            #check if this dataset exists
+            f = os.path.join(tdir, "price_df.csv")
+            if os.path.exists(f):
+                df = pd.read_csv(f, index_col=False)
+                return df 
+            else:
+                return 0
+        else:
+            return 0
+        
+    def get_fulldf(self, ticker):
+        self.get_ticker_list()
+        
+        #check if there is a folder for this ticker
+        if ticker in self.ticker_list:
+            tdir = os.path.join(self.datadir,ticker)
+            #check if this dataset exists
+            f = os.path.join(tdir, "full_df.csv")
+            if os.path.exists(f):
+                df = pd.read_csv(f, index_col=False)
+                return df
+            else:
+                return 0
+        else:
+            return 0
