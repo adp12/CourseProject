@@ -46,7 +46,7 @@ class web_query(object):
     '''
 
 
-    def __init__(self, config, pagesizes=None):
+    def __init__(self, config, apis=None, pagesizes=None):
         self.config = config
         self.frames = []
         self.results=None
@@ -61,6 +61,11 @@ class web_query(object):
             self.pagesizes = {'usearch':50 , 'poly':200, 'currents':200 ,'newsapi':100}
         else:
             self.pagesizes=pagesizes
+
+        if apis is None:
+            self.apis = ['usearch', 'poly', 'currents', 'newsapi']
+        else:
+            self.apis = apis
 
     def get_results(self):
         return self.results
@@ -166,30 +171,33 @@ class web_query(object):
 
         if threaded:
             #list of apis to feed to the executor: passed to query_api()
-            apis = ['usearch', 'poly', 'currents', 'newsapi']
             if pages==1:
-                with ThreadPoolExecutor(max_workers=len(apis)+1) as executor:
-                    [executor.submit(self.query_api, query=qt, d_start=d_start, d_end=d_end, api=x) for x in apis]
+                with ThreadPoolExecutor(max_workers=len(self.apis)+1) as executor:
+                    [executor.submit(self.query_api, query=qt, d_start=d_start, d_end=d_end, api=x) for x in self.apis]
             else:
                 #loop through number of pages sending thread executor different desired page for apis
                 for y in range(1, pages+1):
-                    with ThreadPoolExecutor(max_workers=len(apis)+1) as executor:                        
-                        [executor.submit(self.query_api, query=qt, d_start=d_start, d_end=d_end, api=x, page=y) for x in apis]
+                    with ThreadPoolExecutor(max_workers=len(self.apis)+1) as executor:                        
+                        [executor.submit(self.query_api, query=qt, d_start=d_start, d_end=d_end, api=x, page=y) for x in self.apis]
                         #sleep for half a second to give api's time for latency?
                         time.sleep(0.5)
 
         else:
-            # #Running query through Usearch API
-            self.query_Usearch(query=(str(qt[0])+" "+str(qt[1])), d_start=d_start)
+            if 'usearch' in self.apis:
+                # #Running query through Usearch API
+                self.query_Usearch(query=(str(qt[0])+" "+str(qt[1])), d_start=d_start)
             
-            # #Running query through Currents API
-            self.query_currents(query=qt[1], d_start=d_start)
+            if 'currents' in self.apis:
+                # #Running query through Currents API
+                self.query_currents(query=qt[1], d_start=d_start)
             
-            # #Running query through Polygon.io
-            self.query_polygon(ticker=qt[1], d_start=d_start)
+            if 'poly' in self.apis:
+                # #Running query through Polygon.io
+                self.query_polygon(ticker=qt[1], d_start=d_start)
             
-            # #Running query through (google)NewsAPI
-            self.query_newsapi(query=qt[0], d_start=d_start)
+            if 'newsapi' in self.apis:
+                # #Running query through (google)NewsAPI
+                self.query_newsapi(query=qt[0], d_start=d_start)
             
         
     def query_api(self, query, api, d_start='Now', d_end='Now', page=1):
