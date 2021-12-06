@@ -9,3 +9,4 @@ class config(object):
         #Finance Specific APIs
         self.polygon = '9mSbBzXwV5bfbMZciNrC2r9MKENUAtBJ'
         self.yahoo = '6xOgb3cwyF37FSCLg4nWx43ByGsYr3nba13rg9zF'
+        self.alpha = '1CV1OCFE4I7V1SX9'
