@@ -13,6 +13,7 @@ import time
 import timeit
 import urllib.parse
 
+
 class web_query(object):
     '''
     **********************************************************************************
@@ -50,6 +51,7 @@ class web_query(object):
         self.frames = []
         self.results=None
         self.documents=[]
+        self.urls=[]
         self.number_of_documents=None
         self.failed=[]
 
@@ -75,6 +77,7 @@ class web_query(object):
                 soup = BeautifulSoup(response.content, soup_parser)
                 d = soup.get_text()
                 if len(d)>len_min:
+                    self.urls.append(url)
                     self.documents.append(d)
             #else track failures
             else:
@@ -120,6 +123,7 @@ class web_query(object):
                         soup = BeautifulSoup(response.content, soup_parser)
                         d = soup.get_text()
                         if len(d)>len_min:
+                            self.urls.append(url_list[i])
                             self.documents.append(d)
                     #else track failures
                     else:
@@ -162,6 +166,7 @@ class web_query(object):
                 with ThreadPoolExecutor(max_workers=len(apis)+1) as executor:
                     [executor.submit(self.query_api, query=qt, d_start=d_start, d_end=d_end, api=x) for x in apis]
             else:
+                #loop through number of pages sending thread executor different desired page for apis
                 for y in range(1, pages+1):
                     with ThreadPoolExecutor(max_workers=len(apis)+1) as executor:                        
                         [executor.submit(self.query_api, query=qt, d_start=d_start, d_end=d_end, api=x, page=y) for x in apis]
