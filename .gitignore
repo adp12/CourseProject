@@ -130,3 +130,6 @@ dmypy.json
 
 # API keys
 keys.py
+
+# jupyter notebook checkpoints
+.ipynb_checkpoints
