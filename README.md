@@ -11,7 +11,6 @@ Members
 ●	Rahul Jonnalagadda (rjonna2@illinois.edu)
 
 ***
-# Documentation:
 
 ## Description
 
@@ -68,10 +67,13 @@ By collecting a corpus of recent news focused a specific company/security and tr
   * Good for quick price info
   * Was previously good for getting company info before it stoppped working all of a sudden
 
+
 ***
+#### Important Note on API keys
 **The API keys need put into the config.py file under their respective variables.**
 **Please See details in the [util](./util/) folder for setting up the config**
 ***
+
 
 
 ## Method
