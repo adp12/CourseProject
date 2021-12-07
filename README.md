@@ -42,29 +42,29 @@ By collecting a corpus of recent news focused a specific company/security and tr
   * Not good for company info, especially outside of the US
 
 ##### API to get ticker information
-  * AlphaVantage
-   * Free
-   * Simple one-click api key to copy paste
+* AlphaVantage
+  * Free
+  * Simple one-click api key to copy paste
  
 ### Optional APIs (supported)
 * NewsApi (formerly google, now NewsAPI.org)
- * Free Developer Version
- * Only past 1 month's news
- * Daily call limit: 100
- * Page size limit: 100
+  * Free Developer Version
+  * Only past 1 month's news
+  * Daily call limit: 100
+  * Page size limit: 100
 * Currents API
- * Free
- * Daily call limit: 600
- * Page size limit: 200
+  * Free
+  * Daily call limit: 600
+  * Page size limit: 200
 * Usearch (formerly contextual_web, now Web Search on RapidAPI)
- * Need Rapid API account
- * Free-mium
- * Daily call limit: 100
- * Page size limit: 50
- * Rate limit: 1 per second
+  * Need Rapid API account
+  * Free-mium
+  * Daily call limit: 100
+  * Page size limit: 50
+  * Rate limit: 1 per second
 * Yahoo Finance
- * Good for quick price info
- * Was previously good for getting company info before it stoppped working all of a sudden
+  * Good for quick price info
+  * Was previously good for getting company info before it stoppped working all of a sudden
 
 ***
 **The API keys need put into the config.py file under their respective variables.
