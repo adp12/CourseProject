@@ -44,33 +44,33 @@ This section highlights what is needed to run locally and helpful links to get y
   * Not good for company info, especially outside of the US
 
 ##### API to get ticker information
-* ![AlphaVantage](https://www.alphavantage.co/support/#api-key)
+* [AlphaVantage](https://www.alphavantage.co/support/#api-key)
   * Free
   * Easy
  
 ### Optional APIs (supported)
-* ![NewsApi](https://newsapi.org/register) ( (formerly google, now NewsAPI.org)
+* [NewsApi](https://newsapi.org/register) ( (formerly google, now NewsAPI.org)
   * Free Developer Version
   * Only past 1 month's news
   * Daily call limit: 100
   * Page size limit: 100
-* ![Currents API](https://currentsapi.services/en/register)
+* [Currents API](https://currentsapi.services/en/register)
   * Free
   * Daily call limit: 600
   * Page size limit: 200
-* ![Usearch](https://rapidapi.com/contextualwebsearch/api/web-search) (formerly contextual_web, now Web Search on RapidAPI)
+* [Usearch](https://rapidapi.com/contextualwebsearch/api/web-search) (formerly contextual_web, now Web Search on RapidAPI)
   * Need Rapid API account
   * Free-mium
   * Daily call limit: 100
   * Page size limit: 50
   * Rate limit: 1 per second
-* ![Yahoo Finance](https://www.yahoofinanceapi.com)
+* [Yahoo Finance](https://www.yahoofinanceapi.com)
   * Good for quick price info
   * Was previously good for getting company info before it stoppped working all of a sudden
 
 ***
 **The API keys need put into the config.py file under their respective variables.**
-**Please See details in the ![util](./util/) folder for setting up the config**
+**Please See details in the [util](./util/) folder for setting up the config**
 ***
 
 
