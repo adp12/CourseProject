@@ -1,7 +1,9 @@
 import requests
 import re
 import pandas as pd
-
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from dateutil import parser as dparser
 
 class Ticker(object):
     
@@ -94,52 +96,56 @@ class Ticker(object):
 
         
 
-    
-
-    def get_price(self, drange='6mo', interval='1d', chart='candle', source='yahoo'):
+    def get_price(self, days=100, d_start=None, source='alpha'):
         #get price information from yahoo finance api
         #return a pandas dataframe for either a standard line chart[date,price] or a candlestick chart[date,open,high,low,close,volume]
-        yheaders = {'x-api-key':self.config.yahoo}
-        if chart=='line':
-            
-            url = ('https://yfapi.net/v8/finance/spark?'
-                    'interval='+interval+
-                    '&range='+drange+
-                    '&symbols='+self.ticker)
-            response = requests.request("GET",url,headers=yheaders)
+
+        #determining how much data to ask for
+        if d_start==None:
+            if days<=60:
+                asize='compact'
+                drange='3mo'
+            elif days<=100:
+                asize='compact'
+                drange='6mo'
+            else:
+                asize='full'
+                drange='1y'
+        else:
+            d_start = dparser.parse(d_start)
+            alpha_datecut = datetime.now()-relativedelta(days=150)
+            if d_start<alpha_datecut:
+                #all datapoints
+                asize = 'full'
+                drange = '1yr'
+            else:
+                #last 100 datapoints
+                asize = 'compact'
+                drange = '6mo'
+
+        if source == 'alpha':
+            url = ('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY'
+                    '&symbol='+self.ticker+
+                    '&outputsize='+asize+
+                    '&apikey='+self.config.alpha)
+                
+            response = requests.get(url, timeout=10)
             if response.status_code==200:
                 response = response.json()
+                date=[]
+                volume=[]
+                high=[]
+                low=[]
+                opn=[]
+                cls=[]
+                for i in response['Time Series (Daily)']:
+                    date.append(i)
+                    opn.append(response['Time Series (Daily)'][i]['1. open'])
+                    high.append(response['Time Series (Daily)'][i]['2. high'])
+                    low.append(response['Time Series (Daily)'][i]['3. low'])
+                    cls.append(response['Time Series (Daily)'][i]['4. close'])
+                    volume.append(response['Time Series (Daily)'][i]['5. volume'])
 
-                date = response[self.ticker]['timestamp']
-                price = response[self.ticker]['close']
-                price_df = pd.DataFrame()
-                price_df['date']=date
-                price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'], unit='s')
-                price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'].dt.strftime('%Y/%m/%d'))
-                price_df['price']=price
-                price_df = price_df.set_index('date')
-
-                return price_df
-
-        elif chart=='candle':
-            #send request to yahoo finance for daily prices
-            url=('https://yfapi.net/v8/finance/chart/'+self.ticker+"?"+
-                'comparisons='+self.ticker+
-                '&range='+drange+
-                '&region=US'
-                '&interval='+interval+
-                '&lang=en')
-            response = requests.request("GET",url,headers=yheaders)
-
-            if response.status_code==200:
-                response = response.json()            
-                date = response['chart']['result'][0]['timestamp']
-                volume = response['chart']['result'][0]['indicators']['quote'][0]['volume']
-                high = response['chart']['result'][0]['indicators']['quote'][0]['high']
-                low = response['chart']['result'][0]['indicators']['quote'][0]['low']
-                opn = response['chart']['result'][0]['indicators']['quote'][0]['open']
-                cls = response['chart']['result'][0]['indicators']['quote'][0]['close']
-                #put data into pandas df
                 price_df = pd.DataFrame()
                 price_df['date']=date
                 price_df['high']=high
@@ -147,10 +153,68 @@ class Ticker(object):
                 price_df['open']=opn
                 price_df['close']=cls
                 price_df['volume']=volume
-                price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'], unit='s')
+                price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'])
                 price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'].dt.strftime('%Y/%m/%d'))
 
                 return price_df
+
+        elif source == 'yahoo':
+            drange='6mo'
+            interval='1d'
+            chart='candle'
+
+            yheaders = {'x-api-key':self.config.yahoo}
+            if chart=='line':
+                
+                url = ('https://yfapi.net/v8/finance/spark?'
+                        'interval='+interval+
+                        '&range='+drange+
+                        '&symbols='+self.ticker)
+                response = requests.request("GET",url,headers=yheaders)
+                if response.status_code==200:
+                    response = response.json()
+
+                    date = response[self.ticker]['timestamp']
+                    price = response[self.ticker]['close']
+                    price_df = pd.DataFrame()
+                    price_df['date']=date
+                    price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'], unit='s')
+                    price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'].dt.strftime('%Y/%m/%d'))
+                    price_df['price']=price
+                    price_df = price_df.set_index('date')
+
+                    return price_df
+
+            elif chart=='candle':
+                #send request to yahoo finance for daily prices
+                url=('https://yfapi.net/v8/finance/chart/'+self.ticker+"?"+
+                    'comparisons='+self.ticker+
+                    '&range='+drange+
+                    '&region=US'
+                    '&interval='+interval+
+                    '&lang=en')
+                response = requests.request("GET",url,headers=yheaders)
+
+                if response.status_code==200:
+                    response = response.json()            
+                    date = response['chart']['result'][0]['timestamp']
+                    volume = response['chart']['result'][0]['indicators']['quote'][0]['volume']
+                    high = response['chart']['result'][0]['indicators']['quote'][0]['high']
+                    low = response['chart']['result'][0]['indicators']['quote'][0]['low']
+                    opn = response['chart']['result'][0]['indicators']['quote'][0]['open']
+                    cls = response['chart']['result'][0]['indicators']['quote'][0]['close']
+                    #put data into pandas df
+                    price_df = pd.DataFrame()
+                    price_df['date']=date
+                    price_df['high']=high
+                    price_df['low']=low
+                    price_df['open']=opn
+                    price_df['close']=cls
+                    price_df['volume']=volume
+                    price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'], unit='s')
+                    price_df.loc[:,'date'] = pd.to_datetime(price_df.loc[:,'date'].dt.strftime('%Y/%m/%d'))
+
+                    return price_df
 
             
         return response
