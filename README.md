@@ -78,6 +78,8 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 # Method
 *This section goes into detail about the method used to compile web results and extract sentiments and serves as a how to guide for using this code base*
+
+*In addtion there are two diagrams of both the entire model as well as a more focused diagram of the document to relevant sub-document process in the [img](./img/) subdirectory*
 ***
 
 ### Setup
