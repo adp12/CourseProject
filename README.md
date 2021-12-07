@@ -68,11 +68,12 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 ***
 **The API keys need put into the config.py file under their respective variables.**
-**Please See details in the ![util](./util/) folder for setting up the config file**
+**Please See details in the ![util](./util/) folder for setting up the config**
 ***
 
 ## Method
 *This section goes into detail about the method used to compile web results and extract sentiments*
+***
 
 ### Setup
 * Pull in api keys from config
