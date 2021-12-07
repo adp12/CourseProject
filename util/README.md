@@ -1,2 +1,2 @@
 
-[alt text](https://github.com/adp12/CourseProject/tree/main/img/ERD2.png)
+![alt text](../img/ERD2.png)
