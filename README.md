@@ -12,7 +12,7 @@ Members
 
 ***
 
-## Description
+# Description
 
 
 The goal of our project is firstly, to analyze the financial news cycle in different time intervals to create a time interval sentiment metric on particular global securities. Secondly, we would compile the intermediate sentiment results during the metric calculation into a time series dataset that can be compared to price movement in the underlying security. This dataset would potentially have many uses, including the possibility to aid in identifying securities that are more prone to volatility from volume in individual (and potentially more naïve) investors trading in a more impulsive/emotional manner. 
@@ -20,7 +20,7 @@ The goal of our project is firstly, to analyze the financial news cycle in diffe
 By collecting a corpus of recent news focused a specific company/security and trimming it down into subsequently smaller relevant sub-documents, we aim to create a time-series sentiment calculation that can be compared to the price of the company/security. If you are familiar with the concept of a stock price indicator/oscillator, the resulting dataset can be used in a similar manner. This would be a useful tool or addition to the task of stock screening, and could be implemented as an addition to a computational trading strategy.
 
 
-## Setup
+# Setup
 
 *This section highlights what is needed to run locally and helpful links to get you started*
 ***
@@ -76,7 +76,7 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 
 
-## Method
+# Method
 *This section goes into detail about the method used to compile web results and extract sentiments and serves as a how to guide for using this code base*
 ***
 
