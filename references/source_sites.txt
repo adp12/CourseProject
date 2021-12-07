@@ -1,8 +1,28 @@
-News APIs (To Documentation)
-polygon.io[https://polygon.io/docs/getting-started]
-NewsAPI[https://newsapi.org/docs]
-CurrentsAPI[https://currentsapi.services/en/docs]
-YahooFinanceAPI[https://www.yahoofinanceapi.com]
+################################
+### APIs Documentation Sites ###
+################################
+
+-polygon.io
+--(https://polygon.io/docs/getting-started)
+-NewsAPI
+--(https://newsapi.org/docs)
+-CurrentsAPI
+--(https://currentsapi.services/en/docs)
+
+#Need RapidAPI account for Usearch
+-RapidAPI
+--(https://rapidapi.com/hub)
+-USearch/WebSearch
+--(https://rapidapi.com/contextualwebsearch/api/web-search)
+
+-YahooFinanceAPI 
+--(https://www.yahoofinanceapi.com)
+-AlphaVantageAPI
+--(https://www.alphavantage.co/documentation)
+
+################################
+#### Other Online Sources ######
+################################
 
 Transformer Model used for sentiment classification: DistilBERT
 -https://huggingface.co/transformers/task_summary.html
