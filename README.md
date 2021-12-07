@@ -48,7 +48,7 @@ This section highlights what is needed to run locally and helpful links to get y
   * Free
   * Easy
  
-### Optional APIs (supported)
+### Supported APIs
 * [NewsApi](https://newsapi.org/register) ( (formerly google, now NewsAPI.org)
   * Free Developer Version
   * Only past 1 month's news
@@ -128,3 +128,9 @@ This section highlights what is needed to run locally and helpful links to get y
 * `get_ticker_list()` calls the datamanger to return the available list of stored tickers 
 * `get_pricedf()` will tell the datamanger to return the stored price_df.csv as a pandas dataframe. This should have everything needed to graph
 * `get_fulldf()` will return the full_df.csv. This is all of the data needed for recalculation, or recompiling the relevant documents as it holds urls
+
+
+***
+**Note:**
+All used source sites are in the references sub-directory
+In addition, all papers that were foundational in the creation of the code base are in the references sub-directory in pdf format (for those who want a little light reading)
