@@ -83,7 +83,7 @@ By collecting a corpus of recent news focused a specific company/security and tr
 ***
 
 ### Setup
-* Pull in api keys from config making a config variable 'config=config()'
+* Pull in api keys from config making a config variable `config=config()`
   * This variable will need to be passed to any class that needs to call an api 
 * create a `Ticker()` object: passing in config
 * Initiate a `Corpus()` object
