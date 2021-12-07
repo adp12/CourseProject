@@ -36,10 +36,10 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 ##### API to get news data
 * Polygon.io
- * Free for news (pricey for market data)
- * Best option for quickly getting started compiling news
- * Very large page size limit (1000)
- * Not good for company info, especially outside of the US
+  * Free for news (pricey for market data)
+  * Best option for quickly getting started compiling news
+  * Very large page size limit (1000)
+  * Not good for company info, especially outside of the US
 
 ##### API to get ticker information
   * AlphaVantage
