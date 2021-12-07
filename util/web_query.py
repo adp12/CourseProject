@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from dateutil import parser as dparser
 
 import ipywidgets as widgets
@@ -89,7 +90,11 @@ class web_query(object):
     def scrape_results(self, threaded=True, max_docs=50, workforce=20, soup_parser='html.parser'):
         
         url_list = self.results['url'].tolist()
-        url_list = url_list[0:max_docs]
+        if max_docs=='max':
+            url_list = url_list
+        else:
+            url_list = url_list[0:max_docs]
+
         len_min=200
         times = []
         failed = []
@@ -141,12 +146,22 @@ class web_query(object):
         self.results=results
     
 
-    def query_all(self, query, ticker, d_start='Now', d_end='Now', threaded=True):
+    def query_all(self, query, ticker, d_start='Now', d_end='Now', threaded=True, pages=1):
+
+        '''
+        Main driver for query from APIs
+        '''
         
         if threaded:
+            #list of apis to feed to the executor: passed to query_api()
             apis = ['usearch', 'poly', 'currents', 'newsapi']
-            with ThreadPoolExecutor(max_workers=len(apis)) as executor:
+            if pages==1:
+                with ThreadPoolExecutor(max_workers=len(apis)) as executor:
                     [executor.submit(self.query_api, query=query, ticker=ticker, d_start=d_start, d_end=d_end, api=x) for x in apis]
+            else:
+                with ThreadPoolExecutor(max_workers=20) as executor:
+                    for y in range(1, pages+1):
+                        [executor.submit(self.query_api, query=query, ticker=ticker, d_start=d_start, d_end=d_end, api=x, page=y) for x in apis]
         else:
             # #Running query through Usearch API
             self.query_Usearch(query=query, d_start=d_start)
@@ -166,18 +181,19 @@ class web_query(object):
         #Estimated performance increase over iterative: 40%
 
         if api=='usearch':
-            self.query_Usearch(query=query, d_start=d_start, d_end=d_end)
+            self.query_Usearch(query=query, d_start=d_start, d_end=d_end, page=page)
 
         elif api=='poly':
-            self.query_polygon(ticker=ticker, d_start=d_start, d_end=d_end)
+            self.query_polygon(ticker=ticker, d_start=d_start, d_end=d_end, page=page)
 
         elif api=='currents':
-            self.query_currents(query=query, d_start=d_start, d_end=d_end)
+            self.query_currents(query=query, d_start=d_start, d_end=d_end, page=page)
 
         elif api=='newsapi':
-            self.query_newsapi(query=query, d_start=d_start, d_end=d_end)
+            self.query_newsapi(query=query, d_start=d_start, d_end=d_end, page=page)
 
-    def query_Usearch(self, query, d_start='Now', d_end='Now', page=1, pageSize=50):
+
+    def query_Usearch(self, query, d_start='Now', d_end='Now', page=1, pageSize=150):
         query = urllib.parse.quote_plus(query)
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
@@ -195,8 +211,8 @@ class web_query(object):
 
         url = "https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/search/NewsSearchAPI"
         querystring = {"q":query,
-                       "pageNumber":"1",
-                       "pageSize":"150",
+                       "pageNumber":str(page),
+                       "pageSize":str(pageSize),
                        "autoCorrect":"false",
                        "fromPublishedDate":d_start_str,
                        "toPublishedDate":d_end_str}
@@ -218,22 +234,29 @@ class web_query(object):
                 row = {'title':str(x['title']), 'url':x['url'], 'pub_date':x['datePublished']}
                 datalist.append(row)
             df = pd.DataFrame.from_dict(datalist)
+            print('Usearch:', len(df))
             self.frames.append(df)
     
     def query_currents(self, query, d_start='Now', d_end='Now', page=1, pageSize=200):
         #6-Month archive
-
+        datecut = datetime.now()-relativedelta(months=6)
         query = urllib.parse.quote_plus(query)
 
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
             d_end=datetime.now()
+        elif dparser.parse(d_end)<datecut:
+            #default to now if d_end is less than api cutoff
+            d_end = datetime.now()
         else:
             d_end = dparser.parse(d_end)
         d_end_str = d_end.strftime("%Y-%m-%d")
 
         if d_start=='Now':
             d_start=datetime.now()
+        elif dparser.parse(d_start)<datecut:
+            #default to the cutoff date for the api
+            d_start=datecut
         else:
             d_start = dparser.parse(d_start)
         d_start_str = d_start.strftime("%Y-%m-%d")
@@ -260,6 +283,7 @@ class web_query(object):
                 row = {'title':str(x['title']), 'url':x['url'], 'pub_date':x['published']}
                 datalist.append(row)
             df = pd.DataFrame.from_dict(datalist)
+            print('Currents:',len(df))
             self.frames.append(df)
     
     def query_polygon(self, ticker, d_start='Now', d_end='Now', pageSize=200):
@@ -278,7 +302,6 @@ class web_query(object):
         else:
             d_start = dparser.parse(d_start)
         d_start_str = d_start.strftime("%Y-%m-%d")
-
 
         url = ('https://api.polygon.io/v2/reference/news?'
           'ticker='+ticker+
@@ -299,16 +322,20 @@ class web_query(object):
                 row = {'title':str(x['title']), 'url':x['article_url'], 'pub_date':x['published_utc']}
                 datalist.append(row)
             df = pd.DataFrame.from_dict(datalist)
+            print("Polygon:",len(df))
             self.frames.append(df)
     
     def query_newsapi(self, query, d_start='Now', d_end='Now', domains="", exclude="", page=1, pageSize=100):
-        #1 Month archive
-
+        #1 Month archive only (lame af)
+        datecut = datetime.now()-relativedelta(months=1)
         query = urllib.parse.quote_plus(query)
 
         #Valid format : Date format should be YYYY-MM-ddTHH:mm:ss.ss±hh:mm
         if d_end=='Now':
             d_end=datetime.now()
+        elif dparser.parse(d_end)<datecut:
+            #default to now if d_end is less than api cutoff
+            d_end = datetime.now()
         else:
             d_end = dparser.parse(d_end)
         d_end_str = d_end.strftime("%Y-%m-%d")
@@ -316,6 +343,9 @@ class web_query(object):
         # Same thing but for start date
         if d_start=='Now':
             d_start=datetime.now()
+        elif dparser.parse(d_start)<datecut:
+            #default to the cutoff date for the api
+            d_start=datecut
         else:
             d_start = dparser.parse(d_start)
         d_start_str = d_start.strftime("%Y-%m-%d")
@@ -343,4 +373,5 @@ class web_query(object):
                 row = {'title':str(x['title']), 'url':x['url'], 'pub_date':x['publishedAt']}
                 datalist.append(row)
             df = pd.DataFrame.from_dict(datalist)
+            print("NewsAPI:",len(df))
             self.frames.append(df)
