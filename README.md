@@ -11,82 +11,59 @@ Members
 ●	Rahul Jonnalagadda (rjonna2@illinois.edu)
 
 
-11/30 To Ds
+# Documentation:
 
-
-	• Broadly:
-		○ How to use
-		○ Method of data storage
-		○ Method of data presentation
-	• More specific:
-		○ Metric calculation
-			§ Issues may be arising with the sentiment from the transformer
-			§ Hugging face provides a method to add to the training of a model to make it work more specifically to a task
-			§ If we can create a labeled data set with some examples, we may be able to improve it
-			§ Not as bad as it sounds
-		○ Dataset storage
-			§ Still thinking easiest method is local text files for convenience
-		○ Making it use-able
-			§ This is where a dash board would come in handy
-			§ If everything is tuned and working, you could set it to create a few sets for a list of ticker symbols
-			§ The dashboard would then be used to present the sets of data
-		
-		○ Cleaning up config
-			§ Provide sites to obtain APIs that have support
-			§ remove the keys
-			§ adjust the commit history to remove the keys
-			§ Dont push any more keys!
-
-Starting Documentation:
-
-Description
+## Description
+------
 
 The goal of our project is firstly, to analyze the financial news cycle in different time intervals to create a time interval sentiment metric on particular global securities. Secondly, we would compile the intermediate sentiment results during the metric calculation into a time series dataset that can be compared to price movement in the underlying security. This dataset would potentially have many uses, including the possibility to aid in identifying securities that are more prone to volatility from volume in individual (and potentially more naïve) investors trading in a more impulsive/emotional manner. 
 
 By collecting a corpus of recent news focused a specific company/security and trimming it down into subsequently smaller relevant sub-documents, we aim to create a time-series sentiment calculation that can be compared to the price of the company/security. If you are familiar with the concept of a stock price indicator/oscillator, the resulting dataset can be used in a similar manner. This would be a useful tool or addition to the task of stock screening, and could be implemented as an addition to a computational trading strategy.
 
 
+## Setup
+------
 
 
-	• Initial Setup
-		○ Python Dependencies:
-		
-		○ Needed:
-			§ API to get news data
-			§ API to get ticker information
-		○ Recommended APIs to get started
-			§ API to get news data
-				□ Polygon.io
-					® Free for news (pricey for market data)
-					® Best option for quickly getting started compiling news
-					® Very large page size limit (1000)
-					® Not good for company info, especially outside of the US
-			§ API to get ticker information
-				□ AlphaVantage
-					® Free
-					® Simple one-click api key to copy paste
-		○ Optional APIs (supported)
-			§ NewsApi (formerly google, now NewsAPI.org)
-				□ Free Developer Version
-				□ Only past 1 month's news
-				□ Daily call limit: 100
-				□ Page size limit: 100
-			§ Currents API
-				□ Free
-				□ Daily call limit: 600
-				□ Page size limit: 200
-			§ Usearch (formerly contextual_web, now Web Search on RapidAPI)
-				□ Need Rapid API account
-				□ Free-mium
-				□ Daily call limit: 100
-				□ Page size limit: 50
-				□ Rate limit: 1 per second
-			§ Yahoo Finance
-				□ Good for quick price info
-				□ Was previously good for getting company info before it stoppped working all of a sudden
-	
-	The API keys need put into the config.py file under their respective variables.
-	Please See details in the util folder for setting up the config file
+* Initial Setup
+	..* Python Dependencies:
+
+	..* Needed:
+		...* API to get news data
+		...* API to get ticker information
+	..* Recommended APIs to get started
+		...* API to get news data
+			....* Polygon.io
+				.....* Free for news (pricey for market data)
+				.....* Best option for quickly getting started compiling news
+				.....* Very large page size limit (1000)
+				.....* Not good for company info, especially outside of the US
+		...* API to get ticker information
+			....* AlphaVantage
+				.....* Free
+				.....* Simple one-click api key to copy paste
+	..* Optional APIs (supported)
+		...* NewsApi (formerly google, now NewsAPI.org)
+			....* Free Developer Version
+			....* Only past 1 month's news
+			....* Daily call limit: 100
+			....* Page size limit: 100
+		...* Currents API
+			....* Free
+			....* Daily call limit: 600
+			....* Page size limit: 200
+		...* Usearch (formerly contextual_web, now Web Search on RapidAPI)
+			....* Need Rapid API account
+			....* Free-mium
+			....* Daily call limit: 100
+			....* Page size limit: 50
+			....* Rate limit: 1 per second
+		...* Yahoo Finance
+			....* Good for quick price info
+			....* Was previously good for getting company info before it stoppped working all of a sudden
+
+The API keys need put into the config.py file under their respective variables.
+Please See details in the util folder for setting up the config file
 
 
 	• Method
