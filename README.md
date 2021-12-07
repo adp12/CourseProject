@@ -100,7 +100,7 @@ By collecting a corpus of recent news focused a specific company/security and tr
 ### Setting up Ranker and Initial Queries
 * Initiate the ranking function (in our case, custom built BM25 object class from util.pyRanker)
 * Fit the ranker to the corpus documents
-* Build the queries used by the ranking function using `build_queries()` and passing in the ticker object from step 0
+* Build the queries used by the ranking function using `build_queries()` and passing in the ticker object
 ### Initial Ranking
 * Rank corpus documents for relevance with `rank_docs()` passing in the ranker
 * Prune the documents with `prune_docs()`. This is pre-set to only prune 0 ranked documents on the primary query using a standard BM25 score
