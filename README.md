@@ -26,14 +26,14 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 
 * Initial Setup
-	..* Python Dependencies:
+..* Python Dependencies:
 
-	..* Needed:
-		...* API to get news data
-		...* API to get ticker information
-	..* Recommended APIs to get started
-		...* API to get news data
-			....* Polygon.io
+..* Needed:
+...* API to get news data
+...* API to get ticker information
+..* Recommended APIs to get started
+...* API to get news data
+....* Polygon.io
 				.....* Free for news (pricey for market data)
 				.....* Best option for quickly getting started compiling news
 				.....* Very large page size limit (1000)
