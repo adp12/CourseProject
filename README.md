@@ -26,7 +26,7 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 
 * Initial Setup
-..* Python Dependencies:
+  * Python Dependencies:
 
 ..* Needed:
 ...* API to get news data
