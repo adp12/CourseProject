@@ -105,13 +105,13 @@ This section highlights what is needed to run locally and helpful links to get y
 * Create dictionary of sub-docs from the original documents by calling `sub_divide()` and passing in the Transformer's tokenizer(if needed)
   * Note: The tokenizer is needed to ensure that the length of the subdocs created will not exceed the maximum token size used by the Transformer. The Corpus sets the standard distil-BERT tokenizer on initiation.
 * Rank the newly created subdocs using `rank_subdocs()` and pass in the ranker
-* Prune the subdocs with `prune_subdocs()`. This is pre-set similarly to prune_docs() and prunes 0 ranked subdocs using the prime query and standard BM25 score
+* Prune the subdocs with `prune_subdocs()`. This is pre-set similarly to `prune_docs()` and prunes 0 ranked subdocs using the prime query and standard BM25 score
   * Note: Like the `prune_docs()` function, this does not remove any subdocs, but creates an index of the ones to keep from the subdoc dictionary
 ### Relevant Set
 * after sub-dividing and pruning out all the trash, make the relevant set by calling `make_relevant()`
 * Rank the relevant set with `rank_relevant()`.
-  * This ranking function is pre-set to run a BM25 with Structured Query Expansion. The expanded query and its weights set can be adjusted when initiating build_queries()
-* If needed/wanted, you can further prune the relevant set using prune_relevant()
+  * This ranking function is pre-set to run a BM25 with Structured Query Expansion. The expanded query and its weights set can be adjusted when initiating `build_queries()`
+* If needed/wanted, you can further prune the relevant set using `prune_relevant()`
   * Note: unlike the other two pruning functions, this directly adjusts the relevant_set and relevant_scores stored by the corpus
 ### Sentiments
 * `get_sentiments()`: Once a relevant set is established
@@ -123,7 +123,7 @@ This section highlights what is needed to run locally and helpful links to get y
 ### Dataset for graphing
 * initiate a data_manager object from util.data_manager.
   * the `data_manager()` needs the location of the '_data' directory on initiation
-* tell the data_manager to put the data in a retrievable place with data_manager.store_date() and pass in the ticker symbol and dataframes
+* tell the data_manager to put the data in a retrievable place with `data_manager.store_date()` and pass in the ticker symbol and dataframes
 ### Graphing
 * `get_ticker_list()` calls the datamanger to return the available list of stored tickers 
 * `get_pricedf()` will tell the datamanger to return the stored price_df.csv as a pandas dataframe. This should have everything needed to graph
