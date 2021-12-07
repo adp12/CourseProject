@@ -28,6 +28,11 @@ Transformer Model used for sentiment classification: DistilBERT
 -https://huggingface.co/transformers/task_summary.html
 --see also: DistilBERT Paper & Transformers Paper
 
+Re-Training HuggingFace Models
+-https://huggingface.co/docs/transformers/master/en/main_classes/trainer#transformers.Trainer
+-https://towardsdatascience.com/fine-tuning-pretrained-nlp-models-with-huggingfaces-trainer-6326a4456e7b
+
+
 BM25 with sklearn
 -https://gist.github.com/koreyou/f3a8a0470d32aa56b32f198f49a9f2b8
 -https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
