@@ -22,9 +22,9 @@ By collecting a corpus of recent news focused a specific company/security and tr
 
 
 ## Setup
----
-This section highlights what is needed to run locally and helpful links to get you started
----
+
+*This section highlights what is needed to run locally and helpful links to get you started*
+***
 
 
 ### Initial Setup
