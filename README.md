@@ -25,6 +25,33 @@ By collecting a corpus of recent news focused a specific company/security and tr
 *This section highlights what is needed to run locally and helpful links to get you started*
 ***
 
+### Dependencies
+*This project has been implemented with python and uses the following open libraries (listed with their use)*
+
+* Data Processing
+  * numpy
+  * pandas
+  * sklearn
+  * scipy
+  * re
+  * os
+  * math
+* Online Data Retrieval
+  * BeautifulSoup
+  * requests
+  * urllib 
+* Date/time formating
+  * datetime
+  * dateutil
+  * time 
+  * timeit
+* DNN for NLP (sentiment analysis)
+  * torch
+  * transformers
+* Graphing/Utilizing
+  * plotly
+  * dash
+ 
 
 ### Initial Setup
   
