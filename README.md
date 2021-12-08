@@ -51,8 +51,10 @@ By collecting a corpus of recent news focused a specific company/security and tr
 * Graphing/Utilizing
   * plotly
   * dash
- 
 
+*each of these libraries can be installed via pip or by most typical methods used for installing python libraries*
+
+***
 ### Initial Setup
   
 
