@@ -75,7 +75,7 @@ By collecting a corpus of recent news focused a specific company/security and tr
   * Easy
  
 ### Supported APIs
-* [NewsApi](https://newsapi.org/register) ( (formerly google, now NewsAPI.org)
+* [NewsApi](https://newsapi.org/register) (formerly google, now NewsAPI.org)
   * Free Developer Version
   * Only past 1 month's news
   * Daily call limit: 100
