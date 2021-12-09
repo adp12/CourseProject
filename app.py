@@ -69,13 +69,20 @@ def update_graph(ticker, display):
                     low=price_df['low'], close=price_df['close'], name="Price"),
                    secondary_y=True, row=1,col=1)
 
+    
     fig.add_trace(go.Bar(x=price_df['pub_date'], y=price_df['volume'],opacity=0.2, name='Volume'),secondary_y=False)
+
     if 'scores' in display:
-        fig.add_trace(go.Line(x=price_df['pub_date'], y=price_df['scores'], showlegend=True, name='scores'), row=2, col=1)
+        fig.add_trace(go.Line(x=price_df['pub_date'], y=price_df['scores'], showlegend=True, name='scores', line_color='purple'), row=2, col=1)
     if 'sentiments' in display:
-        fig.add_trace(go.Line(x=price_df['pub_date'], y=price_df['sentiments'], showlegend=True, name='sentiments'), row=2, col=1)
+        fig.add_trace(go.Line(x=price_df['pub_date'], y=price_df['sentiments'], showlegend=True, name='sentiments', line_color='lime'), row=2, col=1)
     if 'relevance' in display:
-        fig.add_trace(go.Line(x=price_df['pub_date'], y=price_df['relevance'], showlegend=True, name='relevance'), row=2, col=1)
+        fig.add_trace(go.Line(x=price_df['pub_date'], y=price_df['relevance'], showlegend=True, name='relevance', line_color='orange'), row=2, col=1)
+    
+    fig.add_hline(y=0, opacity=0.5, line_width=1, row=2, col=1)
+    fig.add_hline(y=1, opacity=0.5, line_dash='dash',line_color='green', row=2, col=1)
+    fig.add_hline(y=-1, opacity=0.5, line_dash='dash',line_color='red',row=2,col=1)
+
     fig.add_trace(go.Bar(x=price_df['pub_date'],y=price_df['Doc_Volume'],opacity=0.2, name='Used News Volume'),row=3, col=1)
     fig.update_layout(xaxis_rangeslider_visible=False, width=1000, height=750)
     fig.layout.yaxis2.showgrid=False
