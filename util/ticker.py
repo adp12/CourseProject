@@ -91,7 +91,7 @@ class Ticker(object):
                     tags.append(i.strip())
                 self.tags=tags
 
-        name = re.sub('(Inc|Company|Corporation|Corp|Co|Incorporated|LLC|,|\.| )',"",str(self.name), flags=re.I)
+        name = re.sub('(Inc|Company|Corporation|Corp|Co|Incorporated|LLC|Group|Limited|,|\.)',"",str(self.name), flags=re.I)
         self.name_adj = name
 
         
