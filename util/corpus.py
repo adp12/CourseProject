@@ -11,8 +11,8 @@ import math
 from sklearn.feature_extraction.text import TfidfVectorizer
 import ipywidgets as widgets
 
-from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
 import torch
+from transformers import AutoModelForSequenceClassification, DistilBertForSequenceClassification, DistilBertTokenizer
 from transformers import pipeline
 
 class Corpus(object):
@@ -72,7 +72,7 @@ class Corpus(object):
     #******************************************************************************
     #******************************************************************************
     
-    def __init__(self):
+    def __init__(self, model=None, tokenizer=None):
         
         #corpus data
         self.documents = []
@@ -114,8 +114,19 @@ class Corpus(object):
         self.price_df=None
         
         #Transformer
-        self.model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased-finetuned-sst-2-english')
-        self.tokenizer=DistilBertTokenizer.from_pretrained('distilbert-base-uncased-finetuned-sst-2-english')
+        if model==None:
+            try:#Try to assign the model from our fine-tuned model for this project
+                self.model = AutoModelForSequenceClassification.from_pretrained("adp12/cs410finetune1")
+            except:#catch on error to assign model to standard distilBert
+                self.model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased-finetuned-sst-2-english')
+        else:
+            self.model=model
+        
+        if tokenizer==None:
+            self.tokenizer=DistilBertTokenizer.from_pretrained('distilbert-base-uncased-finetuned-sst-2-english')
+        else:
+            self.tokenizer=tokenizer
+
         self.classifier = pipeline(task='sentiment-analysis',model=self.model,tokenizer=self.tokenizer)
         self.max_tokens = int(self.tokenizer.model_max_length)
         
@@ -408,8 +419,8 @@ class Corpus(object):
             p = np.percentile(self.sub_list_scores, cutoff)
             prune={}
             for x in self.sub_docs.keys():
-                for y in range(0, len(sub_docs[x])):
-                    if subdoc_scores[x][y]>p:
+                for y in range(0, len(self.sub_docs[x])):
+                    if self.subdoc_scores[x][y]>p:
                         if x not in prune.keys():
                             prune[x]=[y]
                         else:
