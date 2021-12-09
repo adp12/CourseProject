@@ -165,7 +165,7 @@ class Corpus(object):
     #******************************************************************************
     
     def set_ticker_data(self, ticker):
-        name = re.sub('(Inc|Company|Corporation|Corp|Co|Incorporated|LLC|,|\.| )',"",str(ticker.name), flags=re.I)
+        name = re.sub('(Inc|Company|Corporation|Corp|Co|Incorporated|LLC|Group|Limited||,|\.)',"",str(ticker.name), flags=re.I)
         self.ticker_sym = str(ticker.ticker)
         self.company_name = str(name)
         self.ticker_tags = ticker.tags    
