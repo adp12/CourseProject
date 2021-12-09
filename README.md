@@ -29,9 +29,11 @@ The `data_creation` notebook serves as a fully functional example of how the cod
 
 ### Visualizing
 We have provided a plotly dash app to interactively graph the datasets you build!
+
 There are two ways to run the dash app in the repo:
-*`python app.py`: from the terminal, which will automatically open your browser to the correct local host address
-*`dash_app.ipynb`: a jupyter notebook version of `app.py`. When the cell for the dash is run, it will give you a hyper link to the local host address with your dashboard
+
+* `python app.py`: from the terminal, which will automatically open your browser to the correct local host address
+* `dash_app.ipynb`: a jupyter notebook version of `app.py`. When the cell for the dash is run, it will give you a hyper link to the local host address with your dashboard
 
 
 # Setup
