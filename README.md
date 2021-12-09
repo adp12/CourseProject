@@ -20,6 +20,20 @@ The goal of our project is firstly, to analyze the financial news cycle in diffe
 By collecting a corpus of recent news focused a specific company/security and trimming it down into subsequently smaller relevant sub-documents, we aim to create a time-series sentiment calculation that can be compared to the price of the company/security. Although the collected data may have many potential uses, we have opted to use the data graphically as a time series. If you are familiar with the concept of a stock price indicator/oscillator, the resulting dataset can be used in a similar manner. This would be a useful tool or addition to the task of stock screening, and could be implemented as an addition to a computational trading strategy.
 
 
+***
+# General Use
+The general methodology to use this code base is to 1.) Build Data and 2.) Visualize the data you have compiled
+
+### Building Data Set
+The `data_creation` notebook serves as a fully functional example of how the code base is used to pipeline local datasets to `_data`
+
+### Visualizing
+We have provided a plotly dash app to interactively graph the datasets you build!
+There are two ways to run the dash app in the repo:
+*`python app.py`: from the terminal, which will automatically open your browser to the correct local host address
+*`dash_app.ipynb`: a jupyter notebook version of `app.py`. When the cell for the dash is run, it will give you a hyper link to the local host address with your dashboard
+
+
 # Setup
 
 *This section highlights what is needed to run locally and helpful links to get you started*
