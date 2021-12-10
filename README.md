@@ -16,7 +16,7 @@ Members
 
 All project deliverables are located in the [deliverables folder](./deliverables). 
 
-[Link to Software Usage Tutorial Presentation](https://mediaspace.illinois.edu/media/t/1_j53uljq5)
+[Link to Software Usage Tutorial Presentation](https://mediaspace.illinois.edu/media/t/1_i11ndldi)
 
 ***
 # Description
